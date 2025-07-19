@@ -1,11 +1,11 @@
 {
 	"name": "svelte-gauge",
 	"description": "Svelte Gauge Component",
-	"author": "vnau",
-	"homepage": "https://github.com/vnau/svelte-gauge#readme",
+	"author": "elebree",
+	"homepage": "https://github.com/elebree/svelte-gauge#readme",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/vnau/svelte-gauge.git"
+		"url": "git+https://github.com/elebree/svelte-gauge.git"
 	},
 	"license": "MIT",
 	"version": "2.0.1",

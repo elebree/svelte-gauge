@@ -6,7 +6,7 @@
 
 A customizable and animated gauge component built with Svelte, perfect for visualizing progress, performance metrics, or other numerical data.
 
-[<img width="100%" alt="svelte.gauge preview" src="images/banner.png">](https://vnau.github.io/svelte-gauge/)
+[<img width="100%" alt="svelte.gauge preview" src="images/banner.png">](https://elebree.github.io/svelte-gauge/)
 
 ## 🎮 Demo
 
