@@ -15,10 +15,10 @@ Experience the Svelte Gauge in action:
 
 ## 📦 Installation
 
-Install the package via npm:
+Install the package via pnpm:
 
 ```bash
-npm install svelte-gauge
+pnpm add svelte-gauge
 ```
 
 ## 🛠 Usage
