@@ -19,7 +19,7 @@
   stop={60}
   stroke={10}
   segments={Array.from(Array(12), (_, i) => [5 * i, 5 * i])}
-  labels={["I","II","III","IIII","IV","V","VI","VII","IIX","IX","X","XI",""]}
+  labels={["XII","I","II","III","IIII","V","VI","VII","VIII","IX","X","XI",""]}
   color={palette[0]}
 >
   <Gauge
