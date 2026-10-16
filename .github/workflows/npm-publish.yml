@@ -1,55 +1,70 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
-
-name: Node.js Package
+name: Publish Package
 
 on:
   release:
-    types: [created]
+    types: [published]
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  # Installs, builds and packs with no publishing rights
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '24'
           cache: pnpm
           cache-dependency-path: ./pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
-      - run: pnpm run package
       # - run: pnpm test
-      - name: Upload dist folder
-        uses: actions/upload-artifact@v4
+      # Builds dist/ and runs publint; pnpm pack doesn't run prepublishOnly
+      - run: pnpm run package
+      - run: pnpm pack
+      # GitHub Packages only accepts npm packages scoped to the repository owner
+      - name: Pack for GitHub Packages
+        run: |
+          npm pkg set name="@${{ github.repository_owner }}/svelte-gauge"
+          pnpm pack
+      - uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: dist/
+          name: package
+          path: "*.tgz"
+          if-no-files-found: error
 
+  # Publishes a tarball the check job built; runs no project or dependency code
   publish-npm:
-    needs: build
+    needs: check
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # npm trusted publishing (OIDC); provenance is added automatically
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org/
-          cache: pnpm
-          cache-dependency-path: ./pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
-      - name: Download dist folder
-        uses: actions/download-artifact@v4
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - uses: actions/download-artifact@v4
         with:
-          name: dist
-          path: dist/
-      - run: pnpm publish
+          name: package
+      - run: npm publish svelte-gauge-*.tgz
+
+  publish-github:
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://npm.pkg.github.com/
+          scope: "@${{ github.repository_owner }}"
+      - uses: actions/download-artifact@v4
+        with:
+          name: package
+      - run: npm publish ${{ github.repository_owner }}-svelte-gauge-*.tgz
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
