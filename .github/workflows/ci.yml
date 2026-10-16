@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: ./pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      # Also checks the prop types in tests/types
+      - run: pnpm check
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        svelte: [4, 5]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: ./pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      # vite-plugin-svelte 4 is the newest version that supports both Svelte 5 and Vite 5
+      - if: matrix.svelte == 5
+        run: pnpm add -D svelte@^5 @sveltejs/vite-plugin-svelte@^4
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      # Screenshot baselines are recorded on Windows and Linux renders text differently, so @visual runs locally only
+      - run: pnpm exec playwright test --grep-invert @visual
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-svelte${{ matrix.svelte }}
+          path: playwright-report/
