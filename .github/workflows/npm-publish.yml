@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: package
       - run: npm publish svelte-gauge-*.tgz
@@ -62,7 +62,7 @@ jobs:
           node-version: '24'
           registry-url: https://npm.pkg.github.com/
           scope: "@${{ github.repository_owner }}"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: package
       - run: npm publish ${{ github.repository_owner }}-svelte-gauge-*.tgz
