@@ -48,12 +48,13 @@
     }
 
     :global(.gauge-slot-content),
+    :global(.gauge-progress),
     :global(.gauge-segment-bg) {
       -webkit-filter: drop-shadow(0px 0px 3px var(--stroke-color));
       filter: drop-shadow(0px 0px 3px var(--stroke-color));
     }
 
-    :global(.gauge-indicator) {
+    :global(.gauge-pointer) {
       display: none;
     }
   }
