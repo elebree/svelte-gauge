@@ -13,6 +13,7 @@
 <div>
   <Gauge
     class="progress"
+    width={125}
     stroke={10}
     displayValue={(v) => v.formattedValue + "%"}
     labels={["∗", "we're doing something important", ""]}
@@ -22,6 +23,7 @@
 
   <Gauge
     class="segmented"
+    width={125}
     stroke={15}
     startAngle={40}
     stopAngle={320}
@@ -38,8 +40,6 @@
 
 <style lang="scss">
   :global(.progress) {
-    width: 125px;
-
     :global(.gauge-slot-content) {
       color: var(--stroke-color);
     }
@@ -49,8 +49,6 @@
   }
 
   :global(.segmented) {
-    width: 125px;
-
     :global(.gauge-progress) {
       display: none;
     }

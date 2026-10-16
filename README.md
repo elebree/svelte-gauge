@@ -43,8 +43,12 @@ Import the component and use it in your Svelte application:
     [34, 66],
     [67, 100],
   ]}
-  width="300px"
+  width={300}
   class="custom-gauge"
 />
 
 ```
+
+### Server-side rendering
+
+A gauge with a numeric `width` (for example `width={300}`) renders its full SVG on the server and in prerendered pages. So do gauges nested in its slot, which start at the slot's size. Any other gauge, sized by CSS or its container (including `width="50%"`), renders only after the browser has measured it.

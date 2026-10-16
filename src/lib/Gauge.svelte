@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { getContext, setContext } from "svelte";
   import { tweened } from "svelte/motion";
   import { cubicOut } from "svelte/easing";
+  import { writable, type Readable } from "svelte/store";
   import {
     calcCurvePath,
     calcLabelOffset,
@@ -31,7 +32,23 @@
 
   let clientWidth: number;
   let clientHeight: number;
-  let visible = false;
+
+  // Gauges in this gauge's slot start at the slot's size until they are measured
+  const SLOT_SIZE = "svelte-gauge:slot-size";
+  const parentSlotSize = getContext<Readable<number> | undefined>(SLOT_SIZE);
+  const slotSize = writable(0);
+  setContext(SLOT_SIZE, slotSize);
+
+  // The measured size; until the container is measured (and on the server),
+  // a numeric width or the slot size of the gauge this one is nested in
+  $: size =
+    clientWidth > 0 && clientHeight > 0
+      ? Math.min(clientWidth, clientHeight)
+      : typeof width === "number" && Number.isFinite(width) && width > 0
+        ? width
+        : ($parentSlotSize ?? 0);
+  // The slot container is inset by the stroke and the label border on each side
+  $: slotSize.set(Math.max(0, size - 2 * (safeStroke + border)));
 
   // Check if any label is present
   const border = labels.some(Boolean) ? 16 : 0;
@@ -66,9 +83,6 @@
       "stop" in segment ? segment.stop : segment[1],
     ].map((v) => scale(v, safeStart, safeStop, safeStartAngle, safeStopAngle))
   );
-
-  // Set visibility on mount for animations
-  onMount(() => (visible = true));
 </script>
 
 <div
@@ -80,10 +94,10 @@
     {`--gauge-stroke: ${safeStroke}px;`}
     {color !== undefined ? `--stroke-color: ${color};` : ''}
     {`--gauge-border: ${border}px;`}
---gauge-radius: {Math.min(clientWidth, clientHeight) / 2}px"
+    {size > 0 ? `--gauge-radius: ${size / 2}px;` : ''}"
 >
-  {#if clientWidth > 0 && clientHeight > 0}
-    {@const radius = Math.min(clientWidth, clientHeight) / 2}
+  {#if size > 0}
+    {@const radius = size / 2}
     {@const borderAdjusted = border + safeStroke / 2}
     {@const handlePos = polarToCartesian(
       radius,
@@ -91,7 +105,13 @@
       valueAngle * (Math.PI / 180)
     )}
 
-    <svg class="gauge-visual" xmlns="http://www.w3.org/2000/svg">
+    <!-- The viewBox matches the size, so a prerendered gauge scales if CSS shrinks its container -->
+    <svg
+      class="gauge-visual"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 {size} {size}"
+      preserveAspectRatio="xMinYMin meet"
+    >
       <defs>
         {#each segmentAngles as [from, to], index (index)}
           <path
@@ -111,38 +131,36 @@
       </defs>
 
       <!-- Labels -->
-      {#if visible}
-        <text class="gauge-labels">
-          {#each labels as label, index (index)}
-            <textPath
-              xlink:href="#labels-path-{uuid}"
-              startOffset="{calcLabelOffset(
-                index,
-                labels.length,
-                labelsCentered
-              )}%"
-              text-anchor="middle"
-            >
-              {label}
-            </textPath>
-          {/each}
-        </text>
+      <text class="gauge-labels">
+        {#each labels as label, index (index)}
+          <textPath
+            xlink:href="#labels-path-{uuid}"
+            startOffset="{calcLabelOffset(
+              index,
+              labels.length,
+              labelsCentered
+            )}%"
+            text-anchor="middle"
+          >
+            {label}
+          </textPath>
+        {/each}
+      </text>
 
-        <!-- Display Value -->
-        {#if !$$slots.default}
-          <text class="gauge-slot-content" x="50%" y="50%">
-            {typeof displayValue === "string"
-              ? displayValue
-              : displayValue({
-                  value: safeValue,
-                  animatedValue: $animatedValue,
-                  formattedValue:
-                    $animatedValue === 0 && safeValue === undefined
-                      ? "NaN"
-                      : Math.round($animatedValue).toString(),
-                })}
-          </text>
-        {/if}
+      <!-- Display Value -->
+      {#if !$$slots.default}
+        <text class="gauge-slot-content" x="50%" y="50%">
+          {typeof displayValue === "string"
+            ? displayValue
+            : displayValue({
+                value: safeValue,
+                animatedValue: $animatedValue,
+                formattedValue:
+                  $animatedValue === 0 && safeValue === undefined
+                    ? "NaN"
+                    : Math.round($animatedValue).toString(),
+              })}
+        </text>
       {/if}
 
       <!-- Background arc -->
