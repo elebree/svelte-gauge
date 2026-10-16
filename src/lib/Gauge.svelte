@@ -5,6 +5,7 @@
   import {
     calcCurvePath,
     calcLabelOffset,
+    finiteOr,
     polarToCartesian,
     scale,
     type DisplayValueHandler,
@@ -36,9 +37,35 @@
   const border = labels.some(Boolean) ? 16 : 0;
   const uuid = Math.random().toString(36).slice(-6);
 
+  // Invalid numeric props fall back to their defaults instead of producing NaN geometry
+  $: safeValue = value == null ? undefined : finiteOr(value, undefined, "value");
+  $: safeStart = finiteOr(start, 0, "start");
+  $: safeStop = finiteOr(stop, 100, "stop");
+  $: safeStartAngle = finiteOr(startAngle, 0, "startAngle");
+  $: safeStopAngle = finiteOr(stopAngle, 360, "stopAngle");
+  $: safeStroke = finiteOr(stroke, 20, "stroke", 0);
+
   // Animated value with easing
-  const animatedValue = tweened(start, { duration: 1000, easing });
-  $: animatedValue.set(value ?? 0);
+  const animatedValue = tweened(Number.isFinite(start) ? start : 0, {
+    duration: 1000,
+    easing,
+  });
+  $: animatedValue.set(safeValue ?? 0);
+
+  // The animated value and the segment bounds as angles in degrees
+  $: valueAngle = scale(
+    $animatedValue,
+    safeStart,
+    safeStop,
+    safeStartAngle,
+    safeStopAngle
+  );
+  $: segmentAngles = segments.map((segment) =>
+    [
+      "start" in segment ? segment.start : segment[0],
+      "stop" in segment ? segment.stop : segment[1],
+    ].map((v) => scale(v, safeStart, safeStop, safeStartAngle, safeStopAngle))
+  );
 
   // Set visibility on mount for animations
   onMount(() => (visible = true));
@@ -50,44 +77,26 @@
   bind:clientHeight
   style="
     {width ? `width: ${typeof width === 'string' ? width : width + 'px'};` : ''}
-    {`--gauge-stroke: ${typeof stroke === 'string' ? stroke : stroke + 'px'};`}
+    {`--gauge-stroke: ${safeStroke}px;`}
     {color !== undefined ? `--stroke-color: ${color};` : ''}
     {`--gauge-border: ${border}px;`}
 --gauge-radius: {Math.min(clientWidth, clientHeight) / 2}px"
 >
   {#if clientWidth > 0 && clientHeight > 0}
     {@const radius = Math.min(clientWidth, clientHeight) / 2}
-    {@const borderAdjusted = border + stroke / 2}
+    {@const borderAdjusted = border + safeStroke / 2}
     {@const handlePos = polarToCartesian(
       radius,
       borderAdjusted,
-      scale($animatedValue, start, stop, startAngle, stopAngle) *
-        (Math.PI / 180)
+      valueAngle * (Math.PI / 180)
     )}
 
     <svg class="gauge-visual" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        {#each segments as segment, index (index)}
+        {#each segmentAngles as [from, to], index (index)}
           <path
             id={`segment-${index}-${uuid}`}
-            d={calcCurvePath(
-              radius,
-              borderAdjusted,
-              scale(
-                "start" in segment ? segment.start : segment[0],
-                start,
-                stop,
-                startAngle,
-                stopAngle
-              ),
-              scale(
-                "stop" in segment ? segment.stop : segment[1],
-                start,
-                stop,
-                startAngle,
-                stopAngle
-              )
-            )}
+            d={calcCurvePath(radius, borderAdjusted, from, to)}
           />
         {/each}
         <path
@@ -95,8 +104,8 @@
           d={calcCurvePath(
             radius,
             border - 2,
-            startAngle - (stopAngle - startAngle) / 2,
-            stopAngle + (stopAngle - startAngle) / 2
+            safeStartAngle - (safeStopAngle - safeStartAngle) / 2,
+            safeStopAngle + (safeStopAngle - safeStartAngle) / 2
           )}
         />
       </defs>
@@ -125,10 +134,10 @@
             {typeof displayValue === "string"
               ? displayValue
               : displayValue({
-                  value,
+                  value: safeValue,
                   animatedValue: $animatedValue,
                   formattedValue:
-                    $animatedValue === 0 && value === undefined
+                    $animatedValue === 0 && safeValue === undefined
                       ? "NaN"
                       : Math.round($animatedValue).toString(),
                 })}
@@ -139,7 +148,7 @@
       <!-- Background arc -->
       <path
         class="gauge-background"
-        d={calcCurvePath(radius, borderAdjusted, startAngle, stopAngle)}
+        d={calcCurvePath(radius, borderAdjusted, safeStartAngle, safeStopAngle)}
       />
 
       <!-- Segments -->
@@ -162,25 +171,20 @@
       {/each}
 
       <!-- Progress arc -->
-      {#if value != undefined || $animatedValue != 0}
+      {#if safeValue != undefined || $animatedValue != 0}
         <path
           class="gauge-progress"
-          d={calcCurvePath(
-            radius,
-            borderAdjusted,
-            startAngle,
-            scale($animatedValue, start, stop, startAngle, stopAngle)
-          )}
+          d={calcCurvePath(radius, borderAdjusted, safeStartAngle, valueAngle)}
         />
       {/if}
 
       <!-- Handle -->
-      {#if value != undefined || $animatedValue != 0}
+      {#if safeValue != undefined || $animatedValue != 0}
         <circle
           class="gauge-pointer"
           cx={handlePos.x}
           cy={handlePos.y}
-          r={stroke / 2}
+          r={safeStroke / 2}
         />
       {/if}
     </svg>
@@ -188,7 +192,7 @@
     {#if !!$$slots.default}
       <div class="gauge-slot-container">
         <slot
-          value={$animatedValue === 0 && value === undefined
+          value={$animatedValue === 0 && safeValue === undefined
             ? undefined
             : $animatedValue}
         />
