@@ -1,10 +1,14 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import Gauge from "$lib/Gauge.svelte";
 
   let value: number | undefined = 25;
-  setInterval(() => {
-    value = Math.round(Math.random() * 100);
-  }, 1000);
+  onMount(() => {
+    const timer = setInterval(() => {
+      value = Math.round(Math.random() * 100);
+    }, 1000);
+    return () => clearInterval(timer);
+  });
 </script>
 
 <div class="neon-container">

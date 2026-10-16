@@ -1,8 +1,12 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import Gauge from "$lib/Gauge.svelte";
   let value = 0;
-  setInterval(() => {
-    value = Math.min(100, Math.round((Date.now() % 12000) / 100));
+  onMount(() => {
+    const timer = setInterval(() => {
+      value = Math.min(100, Math.round((Date.now() % 12000) / 100));
+    }, 100);
+    return () => clearInterval(timer);
   });
 </script>
 

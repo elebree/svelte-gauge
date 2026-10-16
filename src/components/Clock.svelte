@@ -1,12 +1,16 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import Gauge from "$lib/Gauge.svelte";
   import { elasticOut } from "svelte/easing";
   let date: Date = new Date(Date.now());
 
   const palette = ["#f7b5ff", "#e085fd", "#ad54c9"];
-  setInterval(() => {
-    date = new Date(Date.now());
-  }, 500);
+  onMount(() => {
+    const timer = setInterval(() => {
+      date = new Date(Date.now());
+    }, 500);
+    return () => clearInterval(timer);
+  });
 </script>
 
 <Gauge

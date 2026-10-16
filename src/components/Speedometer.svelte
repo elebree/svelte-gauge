@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import Gauge from "$lib/Gauge.svelte";
   import { cubicIn, cubicOut } from "svelte/easing";
   const palette = ["#ffffff", "#d43008", "#666666c0"];
@@ -6,10 +7,13 @@
   let speed = 0;
   let rpm = 0;
 
-  setInterval(() => {
-    const time = (Date.now() % 6000) / 5000;
-    speed = cubicIn(time) * 100;
-    rpm = cubicOut(time) * 9000;
+  onMount(() => {
+    const timer = setInterval(() => {
+      const time = (Date.now() % 6000) / 5000;
+      speed = cubicIn(time) * 100;
+      rpm = cubicOut(time) * 9000;
+    }, 50);
+    return () => clearInterval(timer);
   });
 </script>
 
