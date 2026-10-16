@@ -21,7 +21,7 @@
     stroke={15}
     startAngle={40}
     stopAngle={320}
-    displayValue={""}
+    displayValue=""
     segments={[
       { start: 0, stop: 33, color: "#f6a944", label: "Low" },
       { start: 33, stop: 66, color: "#8a9305", label: "Medium" },

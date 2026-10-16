@@ -42,17 +42,6 @@
 
   // Set visibility on mount for animations
   onMount(() => (visible = true));
-
-  // Transition effect for spinning animation
-  function spin(node: SVGGElement) {
-    return {
-      duration: 1000 + Math.random() * 300,
-      css: (t: number) => {
-        const eased = easing(t);
-        return `transform: rotate(${eased * 360}deg); transform-origin: 50% 50%;`;
-      },
-    };
-  }
 </script>
 
 <div
@@ -78,7 +67,7 @@
 
     <svg class="gauge-visual" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        {#each segments as segment, index}
+        {#each segments as segment, index (index)}
           <path
             id={`segment-${index}-${uuid}`}
             d={calcCurvePath(
@@ -115,7 +104,7 @@
       <!-- Labels -->
       {#if visible}
         <text class="gauge-labels">
-          {#each labels as label, index}
+          {#each labels as label, index (index)}
             <textPath
               xlink:href="#labels-path-{uuid}"
               startOffset="{calcLabelOffset(
@@ -154,7 +143,7 @@
       />
 
       <!-- Segments -->
-      {#each segments as segment, index}
+      {#each segments as segment, index (index)}
         <g
           style={"color" in segment && segment.color
             ? `--segment-color: ${segment.color}`

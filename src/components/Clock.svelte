@@ -32,7 +32,6 @@
     stroke={20}
     color={palette[1]}
     ><Gauge
-      let:value
       startAngle={180}
       stopAngle={180 + 360}
       easing={elasticOut}

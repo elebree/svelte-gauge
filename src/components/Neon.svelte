@@ -5,8 +5,6 @@
   setInterval(() => {
     value = Math.round(Math.random() * 100);
   }, 1000);
-
-  const palette = ["#000000", "#d43008", "#aaaaaa"];
 </script>
 
 <div class="neon-container">
@@ -18,7 +16,6 @@
     width={125}
     displayValue={(v) => v.formattedValue + "dB"}
     {value}
-    let:value
   ></Gauge>
   <Gauge
     color="#5ad2f7"
@@ -30,7 +27,6 @@
     width={125}
     {value}
     displayValue={(v) => v.formattedValue + "%"}
-    let:value
   ></Gauge>
 </div>
 
