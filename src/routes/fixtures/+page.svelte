@@ -6,6 +6,8 @@
 
   let reactiveValue: number | undefined = 20;
   let resizeWidth = 180;
+  const startString = "10" as unknown as number;
+  const strokeString = "1rem" as unknown as number;
 </script>
 
 <svelte:head>
@@ -228,6 +230,7 @@
   <section data-testid="reactive">
     <Gauge width={160} stroke={12} value={reactiveValue} easing={jump} />
     <button on:click={() => (reactiveValue = 80)}>Set 80</button>
+    <button on:click={() => (reactiveValue = Infinity)}>Set Infinity</button>
     <button on:click={() => (reactiveValue = undefined)}>Clear</button>
   </section>
 
@@ -244,12 +247,53 @@
     <Gauge width={160} stroke={12} value={75} />
     <p>default animation</p>
   </section>
+
+  <section data-testid="reverse-labels">
+    <Gauge
+      width={160}
+      stroke={12}
+      value={50}
+      startAngle={0}
+      stopAngle={-270}
+      labels={["A", "B", "C"]}
+      easing={jump}
+    />
+    <p>reverse with labels</p>
+  </section>
+
+  <section data-testid="invalid-range">
+    <Gauge
+      width={160}
+      value={50}
+      start={NaN}
+      stop={Infinity}
+      stroke={-10}
+      segments={[
+        [NaN, 50],
+        [50, Infinity],
+      ]}
+      easing={jump}
+    />
+    <p>invalid range and stroke</p>
+  </section>
+
+  <section data-testid="non-numbers">
+    <Gauge
+      width={160}
+      value={50}
+      start={startString}
+      stroke={strokeString}
+      easing={jump}
+    />
+    <p>strings for numbers</p>
+  </section>
 </div>
 
 <style>
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, 220px);
+    align-items: start;
     gap: 16px;
     padding: 16px;
   }

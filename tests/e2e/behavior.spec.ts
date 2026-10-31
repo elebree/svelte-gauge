@@ -65,6 +65,19 @@ test("class, color, stroke and label border reach the container as CSS hooks", a
 test("invalid numbers fall back to the defaults", async ({ page }) => {
   expect(await cssVar(page, "invalid", "--gauge-stroke")).toBe("20px");
   await expect(page.getByTestId("invalid").locator(".gauge-background")).toHaveAttribute("d", /^M [\d.]+ [\d.]+ A /);
+  for (const id of ["invalid-range", "non-numbers"]) {
+    expect(await cssVar(page, id, "--gauge-stroke"), id).toBe("20px");
+    await expect(page.getByTestId(id).locator(".gauge-pointer"), id).toHaveAttribute("r", "10");
+  }
+});
+
+test("an infinite value counts as no value", async ({ page }) => {
+  const reactive = page.getByTestId("reactive");
+  await expect(reactive.locator(".gauge-slot-content")).toHaveText("20");
+  await reactive.getByRole("button", { name: "Set Infinity" }).click();
+  await expect(reactive.locator(".gauge-progress")).toHaveCount(0);
+  await expect(reactive.locator(".gauge-pointer")).toHaveCount(0);
+  await expect(reactive.locator(".gauge-slot-content")).toHaveText("NaN");
 });
 
 test("the default slot replaces the value text and receives the value", async ({ page }) => {
