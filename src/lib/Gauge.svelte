@@ -160,7 +160,7 @@
                 animatedValue: $animatedValue,
                 formattedValue:
                   $animatedValue === 0 && safeValue === undefined
-                    ? "NaN"
+                    ? ""
                     : Math.round($animatedValue).toString(),
               })}
         </text>

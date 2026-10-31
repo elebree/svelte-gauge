@@ -40,7 +40,7 @@ test.describe("prerendered fixtures", () => {
     await expect(page.getByTestId("basic").locator(".gauge-slot-content")).toHaveText("0");
     await expect(page.getByTestId("display-fn").locator(".gauge-slot-content")).toHaveText("0 km/h");
     await expect(page.getByTestId("display-string").locator(".gauge-slot-content")).toHaveText("OK");
-    await expect(page.getByTestId("no-value").locator(".gauge-slot-content")).toHaveText("NaN");
+    await expect(page.getByTestId("no-value").locator(".gauge-slot-content")).toHaveText("");
     await expect(page.getByTestId("slot-value")).toHaveText("0");
   });
 

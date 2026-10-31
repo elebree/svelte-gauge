@@ -13,9 +13,6 @@ export default defineConfig({
     baseURL: `http://localhost:${port}`,
     trace: "retain-on-failure",
   },
-  expect: {
-    toHaveScreenshot: { maxDiffPixelRatio: 0.01 },
-  },
   projects: [
     // Node only: geometry helpers and the packed npm package
     { name: "unit", testDir: "tests/unit" },

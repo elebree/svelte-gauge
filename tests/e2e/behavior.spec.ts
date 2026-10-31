@@ -16,8 +16,8 @@ test("value text shows the value, the displayValue string or the function result
   await expect(text("clamped")).toHaveText("150");
   await expect(text("display-string")).toHaveText("OK");
   await expect(text("display-fn")).toHaveText("40 km/h");
-  await expect(text("no-value")).toHaveText("NaN");
-  await expect(text("invalid")).toHaveText("NaN");
+  await expect(text("no-value")).toHaveText("");
+  await expect(text("invalid")).toHaveText("");
 });
 
 test("an undefined or invalid value hides the progress arc and the pointer", async ({ page }) => {
@@ -77,7 +77,7 @@ test("an infinite value counts as no value", async ({ page }) => {
   await reactive.getByRole("button", { name: "Set Infinity" }).click();
   await expect(reactive.locator(".gauge-progress")).toHaveCount(0);
   await expect(reactive.locator(".gauge-pointer")).toHaveCount(0);
-  await expect(reactive.locator(".gauge-slot-content")).toHaveText("NaN");
+  await expect(reactive.locator(".gauge-slot-content")).toHaveText("");
 });
 
 test("the default slot replaces the value text and receives the value", async ({ page }) => {
@@ -97,7 +97,7 @@ test("updates when the value changes or is cleared", async ({ page }) => {
   await reactive.getByRole("button", { name: "Clear" }).click();
   await expect(reactive.locator(".gauge-progress")).toHaveCount(0);
   await expect(reactive.locator(".gauge-pointer")).toHaveCount(0);
-  await expect(reactive.locator(".gauge-slot-content")).toHaveText("NaN");
+  await expect(reactive.locator(".gauge-slot-content")).toHaveText("");
 });
 
 test("follows the size of its container", async ({ page }) => {
