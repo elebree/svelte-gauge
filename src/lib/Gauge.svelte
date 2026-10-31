@@ -104,6 +104,8 @@
       borderAdjusted,
       valueAngle * (Math.PI / 180)
     )}
+    {@const labelsReversed = safeStopAngle < safeStartAngle}
+    {@const labelSweep = Math.abs(safeStopAngle - safeStartAngle)}
 
     <!-- The viewBox matches the size, so a prerendered gauge scales if CSS shrinks its container -->
     <svg
@@ -124,8 +126,8 @@
           d={calcCurvePath(
             radius,
             border - 2,
-            safeStartAngle - (safeStopAngle - safeStartAngle) / 2,
-            safeStopAngle + (safeStopAngle - safeStartAngle) / 2
+            Math.min(safeStartAngle, safeStopAngle) - labelSweep / 2,
+            Math.max(safeStartAngle, safeStopAngle) + labelSweep / 2
           )}
         />
       </defs>
@@ -138,7 +140,8 @@
             startOffset="{calcLabelOffset(
               index,
               labels.length,
-              labelsCentered
+              labelsCentered,
+              labelsReversed
             )}%"
             text-anchor="middle"
           >

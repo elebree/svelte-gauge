@@ -50,6 +50,12 @@ test.describe("calcLabelOffset", () => {
     expect([0, 1, 2].map((i) => calcLabelOffset(i, 3, true))).toEqual([33.33, 50, 66.67]);
     expect(calcLabelOffset(0, 1, true)).toBe(50);
   });
+
+  test("counts from the end of the label path in reverse", () => {
+    expect([0, 1, 2].map((i) => calcLabelOffset(i, 3, false, true))).toEqual([75, 50, 25]);
+    expect([0, 1, 2].map((i) => calcLabelOffset(i, 3, true, true))).toEqual([66.67, 50, 33.33]);
+    expect(calcLabelOffset(0, 1, false, true)).toBe(75);
+  });
 });
 
 test.describe("finiteOr", () => {

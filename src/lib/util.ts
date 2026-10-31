@@ -28,14 +28,16 @@ export const scale = (
     return targetStart + ((targetStop - targetStart) * (clamped - start)) / (stop - start);
 };
 
-// Calculate label offset based on index and total number of labels
+// Calculate label offset based on index and total number of labels.
+// The label path is always clockwise, so in a counterclockwise gauge (reverse) labels count from its end.
 export const calcLabelOffset = (
     index: number,
     count: number,
-    center: boolean
+    center: boolean,
+    reverse = false
 ): number => {
     const c = (count === 1 && !center) ? 0 : (index + (center ? 0.5 : 0)) / (count - (center ? 0 : 1));
-    return Math.round((25 + 50 * c) * 100) / 100;
+    return Math.round((25 + 50 * (reverse ? 1 - c : c)) * 100) / 100;
 };
 
 // Convert polar coordinates to Cartesian
