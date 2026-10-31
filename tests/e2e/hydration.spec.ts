@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./coverage.js";
 import { collectErrors, invalidAttributes, serverRendered } from "./fixtures.js";
 
 test("prerendered gauges keep their size when the page hydrates", async ({ page, request }) => {

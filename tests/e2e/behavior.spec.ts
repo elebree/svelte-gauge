@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./coverage.js";
 import { gauge } from "./fixtures.js";
 
 // Computed value of a CSS custom property on a fixture's outermost gauge

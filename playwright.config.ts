@@ -9,6 +9,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
+  globalSetup: process.env.COVERAGE ? "./tests/e2e/coverage-setup.ts" : undefined,
   use: {
     baseURL: `http://localhost:${port}`,
     trace: "retain-on-failure",

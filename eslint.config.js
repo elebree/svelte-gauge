@@ -25,6 +25,6 @@ export default ts.config(
 	}
   },
   {
-    ignores: ["build/", ".svelte-kit/", "dist/", "test-results/", "playwright-report/"]
+    ignores: ["build/", ".svelte-kit/", "dist/", "test-results/", "playwright-report/", "coverage/"]
   }
 );

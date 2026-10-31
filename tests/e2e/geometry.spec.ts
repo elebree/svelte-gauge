@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./coverage.js";
 import { R, arcLength, serverRendered } from "./fixtures.js";
 
 // Rendered length of an SVG path, as measured by the browser

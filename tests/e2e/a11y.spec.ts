@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./coverage.js";
 
 for (const path of ["/", "/fixtures"]) {
   test(`${path} has no serious accessibility violations`, async ({ page }) => {

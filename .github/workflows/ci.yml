@@ -26,6 +26,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -43,10 +46,39 @@ jobs:
       - if: matrix.svelte == 5
         run: pnpm add -D svelte@^5 @sveltejs/vite-plugin-svelte@^4
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
-      # Screenshot baselines are recorded on Windows and Linux renders text differently, so @visual runs locally only
+      # Screenshots need a fixed browser build and fonts, so @visual runs in the visual job
       - run: pnpm exec playwright test --grep-invert @visual
+        env:
+          COVERAGE: ${{ matrix.svelte == 4 && '1' || '' }}
+      - if: matrix.svelte == 4
+        uses: codecov/codecov-action@v7
+        with:
+          files: coverage/lcov.info
+          disable_search: true
+          use_oidc: true
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report-svelte${{ matrix.svelte }}
+          path: playwright-report/
+
+  visual:
+    runs-on: ubuntu-latest
+    # The image pins the browser build and the fonts. Keep its tag at the installed @playwright/test version;
+    # `pnpm test:visual:linux` records the *-linux.png baselines in the same image.
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: ./pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright test --project=chromium --grep @visual
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-visual
           path: playwright-report/

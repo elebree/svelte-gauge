@@ -30,7 +30,9 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "eslint .",
 		"test": "playwright test",
-		"test:svelte5": "node scripts/test-svelte5.mjs"
+		"test:svelte5": "node scripts/test-svelte5.mjs",
+		"test:visual:linux": "node scripts/test-visual-linux.mjs",
+		"test:coverage": "node scripts/test-coverage.mjs"
 	},
 	"files": [
 		"dist",
@@ -63,6 +65,7 @@
 		"eslint": "^10.12.0",
 		"eslint-plugin-svelte": "^3.23.1",
 		"globals": "^17.13.0",
+		"monocart-coverage-reports": "^2.13.2",
 		"publint": "^0.3.25",
 		"sass": "^1.105.2",
 		"svelte": "^4.2.20",

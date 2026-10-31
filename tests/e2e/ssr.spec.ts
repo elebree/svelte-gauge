@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./coverage.js";
 import { clientOnly, gauge, serverRendered } from "./fixtures.js";
 
 // What visitors see before JavaScript loads: the prerendered HTML only

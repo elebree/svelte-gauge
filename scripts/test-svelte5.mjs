@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 
 const root = process.cwd();
-const skip = new Set(["node_modules", ".git", ".svelte-kit", ".pnpm-store", "build", "dist", "test-results", "playwright-report"]);
+const skip = new Set(["node_modules", ".git", ".svelte-kit", ".pnpm-store", "build", "dist", "test-results", "playwright-report", "coverage"]);
 const dir = mkdtempSync(join(tmpdir(), "svelte-gauge-svelte5-"));
 cpSync(root, dir, {
   recursive: true,
