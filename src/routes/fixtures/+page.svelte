@@ -3,8 +3,12 @@
 
   // Jump straight to the value, so tests and screenshots see the final state after one frame
   const jump = () => 1;
+  // Hold the value halfway for the whole animation, so a test can tell which easing a change used
+  const half = () => 0.5;
 
   let reactiveValue: number | undefined = 20;
+  let reactiveLabels: string[] = [];
+  let reactiveEasing = jump;
   let resizeWidth = 180;
   const startString = "10" as unknown as number;
   const strokeString = "1rem" as unknown as number;
@@ -27,6 +31,11 @@
   <section data-testid="no-value">
     <Gauge width={160} stroke={12} value={undefined} easing={jump} />
     <p>no value</p>
+  </section>
+
+  <section data-testid="no-value-start">
+    <Gauge width={160} stroke={12} start={10} value={undefined} easing={jump} />
+    <p>no value, start 10</p>
   </section>
 
   <section data-testid="labels">
@@ -228,8 +237,18 @@
   </section>
 
   <section data-testid="reactive">
-    <Gauge width={160} stroke={12} value={reactiveValue} easing={jump} />
+    <Gauge
+      width={160}
+      stroke={12}
+      value={reactiveValue}
+      labels={reactiveLabels}
+      easing={reactiveEasing}
+    />
     <button on:click={() => (reactiveValue = 80)}>Set 80</button>
+    <button on:click={() => ((reactiveEasing = half), (reactiveValue = 80))}
+      >Ease to 80 halfway</button
+    >
+    <button on:click={() => (reactiveLabels = ["A", "B"])}>Add labels</button>
     <button on:click={() => (reactiveValue = Infinity)}>Set Infinity</button>
     <button on:click={() => (reactiveValue = undefined)}>Clear</button>
   </section>

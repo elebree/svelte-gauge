@@ -66,8 +66,13 @@ test("has no runtime dependencies and a Svelte 4 and 5 peer range", () => {
   expect(pkg.peerDependencies).toEqual({ svelte: ">=4.0.0 <6.0.0" });
 });
 
-test("stays within the size budget", () => {
+test("the tarball stays within its size budget", () => {
   expect(statSync(join(work, tarball)).size).toBeLessThanOrEqual(8 * 1024);
+});
+
+test("the runtime code stays within its size budget", () => {
+  // npm gets the package built with Svelte 4. Under Svelte 5, svelte-package keeps the TypeScript in Gauge.svelte.
+  test.skip(Number(VERSION.split(".")[0]) >= 5, "measured on the Svelte 4 build, which is the one published");
   const runtime = ["index.js", "Gauge.svelte", "util.js"]
     .map((file) => statSync(join(installed, "dist", file)).size)
     .reduce((sum, size) => sum + size, 0);

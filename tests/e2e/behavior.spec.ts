@@ -17,11 +17,12 @@ test("value text shows the value, the displayValue string or the function result
   await expect(text("display-string")).toHaveText("OK");
   await expect(text("display-fn")).toHaveText("40 km/h");
   await expect(text("no-value")).toHaveText("");
+  await expect(text("no-value-start")).toHaveText("");
   await expect(text("invalid")).toHaveText("");
 });
 
 test("an undefined or invalid value hides the progress arc and the pointer", async ({ page }) => {
-  for (const id of ["no-value", "invalid"]) {
+  for (const id of ["no-value", "no-value-start", "invalid"]) {
     await expect(page.getByTestId(id).locator(".gauge-progress"), id).toHaveCount(0);
     await expect(page.getByTestId(id).locator(".gauge-pointer"), id).toHaveCount(0);
   }
@@ -38,6 +39,36 @@ test("labels are spread along the arc, or centered in equal slots", async ({ pag
   expect(await offsets("labels")).toEqual(["25%", "50%", "75%"]);
   expect(await offsets("labels-centered")).toEqual(["33.33%", "50%", "66.67%"]);
   await expect(page.getByTestId("labels").locator(".gauge-labels textPath")).toHaveText(["A", "B", "C"]);
+  await expect(page.getByTestId("labels").locator(".gauge-labels textPath").first()).toHaveAttribute("href", /^#labels-path-/);
+});
+
+test("labels added later reserve their border", async ({ page }) => {
+  const reactive = page.getByTestId("reactive");
+  expect(await cssVar(page, "reactive", "--gauge-border")).toBe("0px");
+  await reactive.getByRole("button", { name: "Add labels" }).click();
+  await expect(reactive.locator(".gauge-labels textPath")).toHaveText(["A", "B"]);
+  expect(await cssVar(page, "reactive", "--gauge-border")).toBe("16px");
+});
+
+test("a new easing applies to the next change", async ({ page }) => {
+  const reactive = page.getByTestId("reactive");
+  await expect(reactive.locator(".gauge-slot-content")).toHaveText("20");
+  // The first text the gauge shows after the click
+  const text = await reactive.evaluate((section) => {
+    const content = section.querySelector(".gauge-slot-content")!;
+    const changed = new Promise<string | null>((resolve) =>
+      new MutationObserver(() => resolve(content.textContent)).observe(content, {
+        characterData: true,
+        childList: true,
+        subtree: true,
+      })
+    );
+    [...section.querySelectorAll("button")].find((button) => button.textContent === "Ease to 80 halfway")!.click();
+    return changed;
+  });
+  // The new easing holds the value halfway between 20 and 80; the old one would have jumped to 80
+  expect(text).toBe("50");
+  await expect(reactive.locator(".gauge-slot-content")).toHaveText("80");
 });
 
 test("object segments get their color and label, tuple segments render plain", async ({ page }) => {
@@ -45,6 +76,7 @@ test("object segments get their color and label, tuple segments render plain", a
   await expect(segments.locator("use.gauge-segment")).toHaveCount(3);
   await expect(segments.locator("g").first()).toHaveAttribute("style", "--segment-color: #f6a944");
   await expect(segments.locator(".gauge-segment-label")).toHaveText(["Low", "Mid", "High"]);
+  await expect(segments.locator(".gauge-segment-label textPath").first()).toHaveAttribute("href", /^#segment-0-/);
 
   const tuples = page.getByTestId("segments-tuple");
   await expect(tuples.locator("use.gauge-segment")).toHaveCount(3);

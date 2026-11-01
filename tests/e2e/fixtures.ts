@@ -4,6 +4,7 @@ import type { Locator, Page } from "@playwright/test";
 export const serverRendered = [
   "basic",
   "no-value",
+  "no-value-start",
   "labels",
   "labels-centered",
   "segments",

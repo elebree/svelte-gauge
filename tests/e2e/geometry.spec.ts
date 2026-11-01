@@ -125,7 +125,7 @@ test("the pointer sits at the value's angle", async ({ page }) => {
 });
 
 test("the pointer sits at the end of the progress arc", async ({ page }) => {
-  for (const id of serverRendered.filter((id) => !["no-value", "invalid", "reactive", "animated"].includes(id))) {
+  for (const id of serverRendered.filter((id) => !["no-value", "no-value-start", "invalid", "reactive", "animated"].includes(id))) {
     const [end, center] = await page.getByTestId(id).locator(".gauge-container").first().evaluate((el) => {
       const progress = el.querySelector(":scope > svg > .gauge-progress") as SVGPathElement;
       const pointer = el.querySelector(":scope > svg > .gauge-pointer") as SVGCircleElement;

@@ -14,7 +14,7 @@
   } from "./util.js";
 
   export let easing: (v: number) => number = cubicOut;
-  export let value: number | undefined;
+  export let value: number | undefined = undefined;
   export let displayValue: string | DisplayValueHandler = (v) =>
     v.formattedValue;
   export let width: number | string | undefined = undefined;
@@ -50,8 +50,8 @@
   // The slot container is inset by the stroke and the label border on each side
   $: slotSize.set(Math.max(0, size - 2 * (safeStroke + border)));
 
-  // Check if any label is present
-  const border = labels.some(Boolean) ? 16 : 0;
+  // Space for the labels, if any label is present
+  $: border = labels.some(Boolean) ? 16 : 0;
   const uuid = Math.random().toString(36).slice(-6);
 
   // Invalid numeric props fall back to their defaults instead of producing NaN geometry
@@ -62,12 +62,17 @@
   $: safeStopAngle = finiteOr(stopAngle, 360, "stopAngle");
   $: safeStroke = finiteOr(stroke, 20, "stroke", 0);
 
-  // Animated value with easing
-  const animatedValue = tweened(Number.isFinite(start) ? start : 0, {
-    duration: 1000,
-    easing,
-  });
-  $: animatedValue.set(safeValue ?? 0);
+  // Animated value with the current easing.
+  const animatedValue = tweened(Number.isFinite(start) ? start : 0);
+  let hadValue = false;
+  const animateTo = (target: number | undefined, rest: number, ease: typeof easing) => {
+    const duration = target === undefined && !hadValue ? 0 : 1000;
+    animatedValue.set(target ?? rest, { duration, easing: ease });
+    hadValue = target !== undefined;
+  };
+  $: animateTo(safeValue, safeStart, easing);
+  // No value, and any animation back to `start` has finished
+  $: resting = safeValue === undefined && $animatedValue === safeStart;
 
   // The animated value and the segment bounds as angles in degrees
   $: valueAngle = scale(
@@ -136,7 +141,7 @@
       <text class="gauge-labels">
         {#each labels as label, index (index)}
           <textPath
-            xlink:href="#labels-path-{uuid}"
+            href="#labels-path-{uuid}"
             startOffset="{calcLabelOffset(
               index,
               labels.length,
@@ -158,10 +163,9 @@
             : displayValue({
                 value: safeValue,
                 animatedValue: $animatedValue,
-                formattedValue:
-                  $animatedValue === 0 && safeValue === undefined
-                    ? ""
-                    : Math.round($animatedValue).toString(),
+                formattedValue: resting
+                  ? ""
+                  : Math.round($animatedValue).toString(),
               })}
         </text>
       {/if}
@@ -183,7 +187,7 @@
           <use href="#segment-{index}-{uuid}" class="gauge-segment" />
           {#if "label" in segment && segment.label}
             <text class="gauge-segment-label">
-              <textPath startOffset="50%" xlink:href="#segment-{index}-{uuid}">
+              <textPath startOffset="50%" href="#segment-{index}-{uuid}">
                 {segment.label}
               </textPath>
             </text>
@@ -192,7 +196,7 @@
       {/each}
 
       <!-- Progress arc -->
-      {#if safeValue != undefined || $animatedValue != 0}
+      {#if !resting}
         <path
           class="gauge-progress"
           d={calcCurvePath(radius, borderAdjusted, safeStartAngle, valueAngle)}
@@ -200,7 +204,7 @@
       {/if}
 
       <!-- Handle -->
-      {#if safeValue != undefined || $animatedValue != 0}
+      {#if !resting}
         <circle
           class="gauge-pointer"
           cx={handlePos.x}
@@ -212,11 +216,7 @@
     <!-- Slot Content -->
     {#if !!$$slots.default}
       <div class="gauge-slot-container">
-        <slot
-          value={$animatedValue === 0 && safeValue === undefined
-            ? undefined
-            : $animatedValue}
-        />
+        <slot value={resting ? undefined : $animatedValue} />
       </div>
     {/if}
   {/if}

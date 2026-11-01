@@ -29,7 +29,8 @@ export const stringDisplay = { value: 1, displayValue: "OK" } satisfies Props;
 export const noValue = { value: undefined } satisfies Props;
 export const cssWidth = { value: 1, width: "50%" } satisfies Props;
 
-// Omitting `value` is still a type error (ROADMAP 1.2); add a `{}` case here once that is fixed
+// Every prop is optional
+export const noProps = {} satisfies Props;
 
 // @ts-expect-error value must be a number
 export const stringValue = { value: "50" } satisfies Props;

@@ -44,6 +44,14 @@ test.describe("prerendered fixtures", () => {
     await expect(page.getByTestId("slot-value")).toHaveText("0");
   });
 
+  test("a gauge without a value shows no pointer or value text, whatever its start", async ({ page }) => {
+    for (const id of ["no-value", "no-value-start"]) {
+      await expect(page.getByTestId(id).locator(".gauge-pointer"), id).toHaveCount(0);
+      await expect(page.getByTestId(id).locator(".gauge-progress"), id).toHaveCount(0);
+      await expect(page.getByTestId(id).locator(".gauge-slot-content"), id).toHaveText("");
+    }
+  });
+
   test("labels and segments are part of the HTML", async ({ page }) => {
     await expect(page.getByTestId("labels").locator(".gauge-labels textPath")).toHaveText(["A", "B", "C"]);
     await expect(page.getByTestId("segments").locator("use.gauge-segment")).toHaveCount(3);
