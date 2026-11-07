@@ -61,7 +61,7 @@
 		"@sveltejs/kit": "^2.70.3",
 		"@sveltejs/package": "^3.0.2",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
-		"@types/node": "^24.19.2",
+		"@types/node": "^26.6.6",
 		"eslint": "^10.14.0",
 		"eslint-plugin-svelte": "^3.23.1",
 		"globals": "^17.13.0",
